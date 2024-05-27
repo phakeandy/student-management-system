@@ -1,6 +1,6 @@
 #include "main.h"
 
-int login(char username[], char password[]) { char name[MAX_NAEM_lEN]; }
+// int login(char username[], char password[]) { char name[MAX_NAEM_lEN]; }
 
 int main()
 {
@@ -19,13 +19,15 @@ int main()
         if ((scanf("%d", &op) == 0))
         {
             printf("Error: 输入无效, 请输入整数\n");
-            clear_buffer();
+            clear_input_buffer();
+            pause_on_win();
             continue;
         }
         switch (op)
         {
         case 0:
-            printf("成功退出!");
+            clear_screen();
+            printf("成功退出, 欢迎下次使用!");
             flag = 0;
             break;
         case 1:
@@ -33,11 +35,18 @@ int main()
             break;
         case 2:
             show_all_student(head);
-            // print_student(head);
             break;
         case 3:
-            // print_student(head);
             find_student(head);
+            break;
+        case 4:
+            update_student(head);
+            break;
+        case 5:
+            delete_student(head);
+            break;
+        case 6:
+            sort_student(head);
             break;
         default:
             printf("Error: 输入无效, 请输入0~6的整数\n");
@@ -54,9 +63,11 @@ void print_menu() // 打印主菜单函数
     printf("1. 添加学生信息            \n");
     printf("2. 显示所有学生信息        \n");
     printf("3. 查询学生信息            \n");
-    printf("4. 排序学生信息            \n");
-    printf("5. 修改学生信息            \n");
+    printf("4. 修改学生信息            \n");
+    printf("5. 删除学生信息            \n");
+    printf("6. 排序学生信息            \n");
     printf("0. 退出                    \n");
+    printf("============================\n");
     printf("请输入相应的序号选择!       \n");
 }
 
@@ -65,7 +76,8 @@ void add_student(Node *head)
     Node *fresh = malloc(sizeof(Node)); // fresh: 新生
     fresh->next = NULL;
     // printf("请输入学生的学号, 姓名, 年龄, 性别, 成绩\n");
-    printf("请输入学生的学号, 姓名, 成绩\n");
+    clear_screen();
+    printf("请输入学生的学号, 姓名, 成绩:\n");
     scanf("%d%s%d", &fresh->student.id, fresh->student.name, &fresh->student.score);
 
     // 尾插法
@@ -81,7 +93,7 @@ void add_student(Node *head)
     pause_on_win();
 }
 
-void clear_buffer()
+void clear_input_buffer()
 {
     int c;
     while ((c = getchar()) != '\n' && c != EOF)
@@ -101,26 +113,43 @@ void print_student(Node *head)
 
 void pause_on_win()
 {
-    system("pause");
-    system("cls");
+    // system("pause");
+    // system("cls");
+    clear_input_buffer();
+    printf("请输入任意字符继续...\n");
+    getchar();
+    clear_screen();
+}
+
+void clear_screen()
+{
+    printf("\033[2J\033[H"); // 跨平台清屏
 }
 
 void show_all_student(Node *head)
+{
+    clear_screen();
+    int count = print_all_student(head);
+    printf("总共有%d位学生...\n", count);
+    pause_on_win();
+}
+
+int print_all_student(Node *head)
 {
     Node *move = head->next;
     int count = 0;
     while (move != NULL)
     {
-        printf("姓名: %s    学号: %d    分数: %d\n", move->student.name, move->student.id, move->student.score);
+        printf("学号: %d    姓名: %s    分数: %d\n", move->student.id, move->student.name, move->student.score);
         count++;
         move = move->next;
     }
-    printf("总共有%d位学生...\n", count);
-    pause_on_win();
+    return count;
 }
 
 void find_student(Node *head)
 {
+    clear_screen();
     printf("请输入学生学号: ");
     int stu_id;
     scanf("%d", &stu_id);
@@ -139,7 +168,7 @@ void find_student(Node *head)
     }
     if (count == 0)
     {
-        printf("没有找到学号为:%d的学生...", stu_id);
+        printf("没有找到学号为:%d的学生...\n", stu_id);
     }
     pause_on_win();
 }
@@ -178,7 +207,7 @@ void load_student(Node *head)
     fresh->next = NULL;
 
     Node *move = head;
-    while (fread(&move->student, sizeof(Student), 1, file) == 1)
+    while (fread(&move->student, sizeof(Student), 1, file) != 1)
     {
         move->next = fresh;
         move = move->next;
@@ -188,4 +217,81 @@ void load_student(Node *head)
     free(fresh);
     fclose(file);
     printf("成功读取学生信息文件存档!!!\n");
+}
+
+void update_student(Node *head)
+{
+    clear_screen();
+    printf("请输入要修改学生的学号: ");
+    int stu_id;
+    scanf("%d", &stu_id);
+
+    Node *move = head->next;
+
+    while (move != NULL)
+    {
+        if (move->student.id = stu_id)
+        {
+            Student stu = move->student;
+            printf("找到学号为:%d的学生: 姓名: %s\t成绩: %d\n", stu.id, stu.name, stu.score);
+            printf("请输入新的学号, 姓名, 成绩:");
+            scanf("%d%s%d", &move->student.id, move->student.name, &move->student.score);
+            save_student(head);
+            printf("成功修改!\n");
+            pause_on_win();
+            return;
+        }
+        move = move->next;
+    }
+
+    printf("未找到学号为%d的学生...\n", stu_id);
+    pause_on_win();
+}
+
+void delete_student(Node *head)
+{
+    show_all_student(head);
+    printf("请输入要删除学生的学号: ");
+    int stu_id;
+    scanf("%d", &stu_id);
+
+    Node *move = head; // 注意没有 next
+
+    while (move->next != NULL)
+    {
+        if (move->next->student.id == stu_id)
+        {
+            Node *tmp = move->next;
+            move->next = move->next->next;
+            free(tmp);  // 释放内存
+            tmp = NULL; // 防止野指针
+            save_student(head);
+            printf("删除成功!\n");
+            pause_on_win();
+            return;
+        }
+        move = move->next;
+    }
+    printf("未找到该学生\n");
+    pause_on_win();
+}
+
+void sort_student(Node *head)
+{
+    // 冒泡排序
+    for (Node *turn = head->next; turn->next != NULL; turn = turn->next)
+    {
+        for (Node *move = head->next; move->next != NULL; move = move->next)
+        {
+            if (move->student.score > move->next->student.score)
+            {
+                // 交换学生而不是节点
+                Student temp = move->student;
+                move->student = move->next->student;
+                move->next->student = temp;
+            }
+        }
+    }
+    printf("排序成功!\n");
+    show_all_student(head);
 }
