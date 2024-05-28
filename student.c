@@ -1,5 +1,5 @@
 #define MAX_NAEM_lEN 20
-#define MAX_STUDENT 40
+#define MAX_STUDENT 1000
 
 typedef struct _Student
 {

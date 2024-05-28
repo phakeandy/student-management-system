@@ -48,6 +48,9 @@ int main()
         case 6:
             sort_student(head);
             break;
+        case 7:
+            get_mean_score(head);
+            break;
         default:
             printf("Error: 输入无效, 请输入0~6的整数\n");
             break;
@@ -66,6 +69,7 @@ void print_menu() // 打印主菜单函数
     printf("4. 修改学生信息            \n");
     printf("5. 删除学生信息            \n");
     printf("6. 排序学生信息            \n");
+    printf("7. 计算学生成绩平均数       \n");
     printf("0. 退出                    \n");
     printf("============================\n");
     printf("请输入相应的序号选择!       \n");
@@ -207,7 +211,7 @@ void load_student(Node *head)
     fresh->next = NULL;
 
     Node *move = head;
-    while (fread(&move->student, sizeof(Student), 1, file) != 1)
+    while (fread(&fresh->student, sizeof(Student), 1, file) == 1)
     {
         move->next = fresh;
         move = move->next;
@@ -294,4 +298,29 @@ void sort_student(Node *head)
     }
     printf("排序成功!\n");
     show_all_student(head);
+}
+
+// 主要是为了使用数组
+int get_mean_score(Node *head)
+{
+    clear_screen();
+    int arr[MAX_STUDENT] = {0};
+    Node *move = head->next;
+
+    int count = 0;
+    while (move != NULL)
+    {
+        arr[count] = move->student.score;
+        count++;
+        move = move->next;
+    }
+
+    int sum = 0;
+    for (int i = 0; i < count; i++)
+    {
+        sum += arr[i];
+    }
+    printf("共有%d名学生\n", count);
+    printf("学生成绩平均数为: %f\n", (double)sum / count);
+    pause_on_win();
 }
